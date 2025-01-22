@@ -126,8 +126,8 @@ func main() {
 	// Start HTTP server for Prometheus to scrape
 	http.Handle("/metrics", promhttp.Handler())
 	go func() {
-		log.Println("Starting server on :8080")
-		if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Println("Starting server on :9977")
+		if err := http.ListenAndServe(":9977", nil); err != nil {
 			log.Fatalf("Error starting HTTP server: %v", err)
 		}
 	}()
