@@ -38,6 +38,14 @@ var (
 		Name: "trading212_position_fxppl",
 		Help: "FX PPL of individual open positions",
 	}, []string{"ticker"})
+	positionCurrentPriceGauge = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "trading212_position_current_price",
+		Help: "Current price of stock",
+	}, []string{"ticker"})
+	positionAveragePriceGauge = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "trading212_position_average_price",
+		Help: "Average price of stock",
+	}, []string{"ticker"})
 )
 
 // Position represents the structure for the given data.
@@ -97,13 +105,15 @@ func UpdateMetrics(apiKey string) {
 	// Update the total number of open positions
 	openPositionsGauge.Set(float64(len(positions)))
 
-	// Reset and update individual position values
+	// Update individual position values
 	for _, pos := range positions {
 		positionQtyGauge.WithLabelValues(pos.Ticker).Set(pos.Quantity)
 		positionValueGauge.WithLabelValues(pos.Ticker).Set(pos.Quantity * pos.CurrentPrice)
 		positionCostGauge.WithLabelValues(pos.Ticker).Set(pos.Quantity * pos.AveragePrice)
 		positionPplGauge.WithLabelValues(pos.Ticker).Set(pos.Ppl)
 		positionFxPplGauge.WithLabelValues(pos.Ticker).Set(pos.FxPpl)
+		positionCurrentPriceGauge.WithLabelValues(pos.Ticker).Set(pos.CurrentPrice)
+		positionAveragePriceGauge.WithLabelValues(pos.Ticker).Set(pos.AveragePrice)
 	}
 
 	log.Printf("Updated metrics for %d open positions", len(positions))
@@ -122,6 +132,8 @@ func main() {
 	prometheus.MustRegister(positionCostGauge)
 	prometheus.MustRegister(positionPplGauge)
 	prometheus.MustRegister(positionFxPplGauge)
+	prometheus.MustRegister(positionCurrentPriceGauge)
+	prometheus.MustRegister(positionAveragePriceGauge)
 
 	// Start HTTP server for Prometheus to scrape
 	http.Handle("/metrics", promhttp.Handler())
